@@ -1,14 +1,17 @@
 import React, {Component} from 'react';
+import 'tachyons';
+
 import './App.css';
 import Navigation from './Component/Navigation/Navigation';
-import 'tachyons';
+import Logo from './Component/Logo/Logo';
+
 class App extends Component {
     render() {
         return (
             <div className="App">
                 <Navigation/>
-                {/* <Logo/>
-                <ImageLink/>
+                <Logo/>
+                {/* <ImageLink/>
                 <FaceRecognition/> */}
             </div>
         );
