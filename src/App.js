@@ -8,6 +8,7 @@ import Logo from './Component/Logo/Logo';
 import Rank from './Component/Rank/Rank';
 import ImageLinkForm from './Component/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Component/FaceRecognition/FaceRecognition';
+import Signin from './Component/Signin/Signin';
 
 // "https://samples.clarifai.com/face-det.jpg"
 
@@ -17,12 +18,14 @@ class App extends Component {
         this.state = {
             input: '',
             imageURL: '',
-            boxes: []
+            boxes: [],
+            route: 'signin'
         }
         this.onInputChange.bind(this);
         this.onButtonSubmit.bind(this);
         this.calculateFaceLocation.bind(this);
         this.displayFaceBox.bind(this);
+        this.onRouteChange.bind(this);
     }
 
     onInputChange = (event) => {
@@ -56,15 +59,25 @@ class App extends Component {
         this.setState({boxes: boxes});
     }
 
+    onRouteChange = (route) => {
+        this.setState({route: route});
+    }
+
     render() {
         return (
             <div className="App">
                 <Particles params={particleParams} className="particles"/>
-                <Navigation/>
-                <Logo/>
-                <Rank/>
-                <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} /> 
-                <FaceRecognition boxes={this.state.boxes} imageURL={this.state.imageURL}/>
+                {
+                this.state.route === "signin"
+                ? <Signin onRouteChange={this.onRouteChange}/>
+                :   <div>
+                        <Navigation onRouteChange={this.onRouteChange}/>
+                        <Logo/>
+                        <Rank/>
+                        <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} /> 
+                        <FaceRecognition boxes={this.state.boxes} imageURL={this.state.imageURL}/>
+                    </div>
+                }
             </div>
         );
     }
