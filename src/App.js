@@ -9,6 +9,67 @@ import Rank from './Component/Rank/Rank';
 import ImageLinkForm from './Component/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Component/FaceRecognition/FaceRecognition';
 
+// "https://samples.clarifai.com/face-det.jpg"
+
+class App extends Component {
+    constructor(){
+        super();
+        this.state = {
+            input: '',
+            imageURL: '',
+            boxes: []
+        }
+        this.onInputChange.bind(this);
+        this.onButtonSubmit.bind(this);
+        this.calculateFaceLocation.bind(this);
+        this.displayFaceBox.bind(this);
+    }
+
+    onInputChange = (event) => {
+        this.setState({input: event.target.value})
+        console.log(event.target.value);
+    }
+    onButtonSubmit = () => {
+        this.setState({imageURL: this.state.input})
+        console.log("click");
+        app.models
+            .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+            .then(response => this.displayFaceBox(this.calculateFaceLocation(response)))
+            .catch(err => console.log(err));
+    }
+    calculateFaceLocation = (data) => {
+        const regions = data.outputs[0].data.regions
+        const clarifaiFaces = regions.map(region => region.region_info.bounding_box);
+        const image = document.getElementById('inputImage');
+        const width = Number(image.width);
+        const height = Number(image.height);
+        return clarifaiFaces.map(clarifaiFace => {
+            return({
+                    leftCol: clarifaiFace.left_col * width,
+                    topRow: clarifaiFace.top_row * height,
+                    rightCol: width - (clarifaiFace.right_col * width),
+                    bottomRow: height - (clarifaiFace.bottom_row * height)
+                })
+            })
+    }
+    displayFaceBox = (boxes) => {
+        this.setState({boxes: boxes});
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <Particles params={particleParams} className="particles"/>
+                <Navigation/>
+                <Logo/>
+                <Rank/>
+                <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} /> 
+                <FaceRecognition boxes={this.state.boxes} imageURL={this.state.imageURL}/>
+            </div>
+        );
+    }
+}
+
 const app = new Clarifai.App({
     apiKey: 'c8f014310246404da6dd51e7f75dda73'
 });
@@ -19,57 +80,10 @@ const particleParams = {
             value: 30,
             density: {
                 enable: true,
-                value_area: 300
+                value_area: 300,
+                box: {}
             }
         }
-    }
-}
-
-
-// "https://samples.clarifai.com/face-det.jpg"
-class App extends Component {
-    constructor(){
-        super();
-
-        this.state = {
-            input: '',
-            imageURL: ''
-        }
-
-        this.onInputChange.bind(this);
-        this.onButtonSubmit.bind(this);
-    }
-
-    onInputChange = (event) => {
-        this.setState({input: event.target.value})
-        console.log(event.target.value);
-    }
-
-    onButtonSubmit = () => {
-        this.setState({imageURL: this.state.input})
-        console.log("click");
-        app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input).then(
-            function(response) {
-                console.log(response.outputs[0].data.regions[0].region_info.bounding_box);
-            },
-            function(err) {
-            // there was an error
-            }
-  );
-    }
-
-    
-    render() {
-        return (
-            <div className="App">
-                <Particles params={particleParams} className="particles"/>
-                <Navigation/>
-                <Logo/>
-                <Rank/>
-                <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} /> 
-                <FaceRecognition imageURL={this.state.imageURL}/>
-            </div>
-        );
     }
 }
 
